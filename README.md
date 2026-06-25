@@ -1,41 +1,33 @@
-# realpong-agent-lamine
+# RealPong agent, Lamine
 
-My agent for the [RealPong tournament arena](https://github.com/Helmus101/tournament) — an 80×80 symmetric Pong where two paddles rally a ball that **accelerates on every hit**, until one reaches 21.
+Two trained CNN agents, one per arena. Each reads the 80x80 frame (2 channels: position + motion)
+and outputs UP/DOWN every step. Both files are self-contained (only `numpy` + `torch`); the arena
+imports the module and calls `Agent(weights_path)`.
 
-## Files
+## What to submit
 
-| file | what it is |
-|------|------------|
-| `newfolder.py` | the model (a small CNN) + the `Agent` class the arena calls |
-| `newfolder_trained_best.pt` | the trained weights |
-| `SUBMIT.txt` | submission notes |
-
-Self-contained — only `numpy` + `torch`, no local imports.
-
-## Submit as
+| Arena   | Run as                              | Network            |
+|---------|-------------------------------------|--------------------|
+| Regular | `lamine.py:lamine.pt`               | ~1.7M-param CNN     |
+| Chaos   | `lamine_chaos.py:lamine_chaos.pt`   | CNN                |
 
 ```
-newfolder.py:newfolder_trained_best.pt
+regular:  lamine.py:lamine.pt
+chaos:    lamine_chaos.py:lamine_chaos.pt
 ```
 
-## How the arena uses it
+## How it was built
 
-It imports `newfolder.py`, builds `Agent("newfolder_trained_best.pt")`, then calls
-`agent.reset()` at the start of each game and `agent.act(frame)` every step.
-`frame` is an 80×80 binary image with **your paddle on the right**; `act()` returns `2` (UP) or `3` (DOWN).
+- Matched the strong opponent's capacity (~1.7M params) so the network could represent its policy.
+- Cloned (distilled) the strong agent to reach its level fast, then ran PPO self-play against a pool
+  of past selves with a pure win/loss reward to push past it. One clean technique, no shaping.
+- Gated promotion: a checkpoint only becomes "best" if it beats the target on (wins, then net score).
 
-## Test locally
+## Run it locally
 
-```bash
-python arena.py newfolder.py:newfolder_trained_best.pt realpong.py:realpong.pt bf
+Drop these next to `arena.py` / `arena_chaos.py` from the tournament repo:
+
 ```
-
-## Results
-
-Current "new ball physics" arena, round-robin, best of 3 to 21:
-
-| opponent | result |
-|----------|--------|
-| repo `realpong` | **21–6, 21–2** (set won) |
-| `bf` (tracker) | **21–0, 21–0** (0 conceded) |
-| round-robin | **🏆 CHAMPION** |
+python arena.py       lamine.py:lamine.pt             willem-cnn.py:willem-cnn.pt --best-of 3
+python arena_chaos.py lamine_chaos.py:lamine_chaos.pt willem-cnn.py:willem-cnn.pt --best-of 3
+```
