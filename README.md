@@ -31,3 +31,8 @@ Drop these next to `arena.py` / `arena_chaos.py` from the tournament repo:
 python arena.py       lamine.py:lamine.pt             willem-cnn.py:willem-cnn.pt --best-of 3
 python arena_chaos.py lamine_chaos.py:lamine_chaos.pt willem-cnn.py:willem-cnn.pt --best-of 3
 ```
+
+## Before this: the attempt that failed
+
+A policy-gradient agent, and the three findings that produced the network above - a selection criterion that rewarded ball-tracking instead of scoring, an environment that would not build, and a network far too small for the opponent. The code and the full training log are in [`first-attempt/`](first-attempt/).
+
